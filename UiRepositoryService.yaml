@@ -10,27 +10,212 @@ info:
     email: support@mmi-media.de
   description: >
     This is the BR BO Repository API documentation used for UI interaction
+    Code Generation: https://www.eclipse.org/codewind/open-api-tools-for-vscode.html
   x-logo:
     url: ./logo.svg
 servers:
   - url: 'https://example.tld/br-bo-repository/v1'
 tags:
   - name: Repository
+  - name: Models
+    x-displayName: Main Models
+    description: |
+      ### Business object
+      <SchemaDefinition schemaRef="#/components/schemas/BusinessObject" />
+
+      ### Instance Group
+      <SchemaDefinition schemaRef="#/components/schemas/InstanceGroup" />
+
+      ### Instance
+      <SchemaDefinition schemaRef="#/components/schemas/Instance" />
+
+      ### Identifier
+      <SchemaDefinition schemaRef="#/components/schemas/Identifier" />
 x-tagGroups:
   - name: Endpoints
     tags:
       - Repository
 paths: 
+  /business-objects/{businessObjectId}:
+    get:
+      summary: Returns a business object by ID
+      tags: 
+        - Repository
+      operationId: getBusinessObject
+      parameters:
+        - name: businessObjectId
+          in: path
+          required: true
+          schema: 
+            $ref: '#/components/schemas/GoId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessObject'
+    delete:
+      summary: Logical deletion of a business object
+      tags: 
+        - Repository
+      operationId: logicallyDeleteBusinessObject
+      parameters:
+        - name: businessObjectId
+          in: path
+          required: true
+          schema: 
+            $ref: '#/components/schemas/GoId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessObject'
+    post:
+      summary: Creation or update of a business object (depending on whether it has an Id or not)
+      tags: 
+        - Repository
+      operationId: createOrUpdateBusinessObject
+      requestBody:
+        description: The business object to be created or updated
+        $ref: '#/components/schemas/BusinessObject'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessObject'
+  /business-objects/{businessObjectId}/hard-delete:
+    post:
+      summary: Physically deletes the business object and all its related entities.
+      description: This is only allowed when the business object and all related entities are already flagged as deleted.
+      tags: 
+        - Repository
+      operationId: physicallyDeleteBusinessObject
+      parameters:
+        - name: businessObjectId
+          in: path
+          required: true
+          schema: 
+            $ref: '#/components/schemas/GoId'
+      responses:
+        '200':
+          description: OK
+  /instance-groups/{instanceGroupId}:
+    delete:
+      summary: Logical deletion of an instance group
+      tags: 
+        - Repository
+      operationId: logicallyDeleteInstanceGroup
+      parameters:
+        - name: instanceGroupId
+          in: path
+          required: true
+          schema: 
+            $ref: '#/components/schemas/Ipn'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstanceGroup'
+    post:
+      summary: Creation or update of an instance group (depending on whether it has an Id or not)
+      tags: 
+        - Repository
+      operationId: createOrUpdateInstanceGroup
+      requestBody:
+        description: The instance group to be created or updated
+        $ref: '#/components/schemas/InstanceGroup'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstanceGroup'
+  /instance-groups/{instanceGroupId}/hard-delete:
+    post:
+      summary: Physically deletes the instance group and all its related entities.
+      description: This is only allowed when the instance group and all related entities are already flagged as deleted.
+      tags: 
+        - Repository
+      operationId: physicallyDeleteInstanceGroup
+      parameters:
+        - name: instanceGroupId
+          in: path
+          required: true
+          schema: 
+            $ref: '#/components/schemas/Ipn'
+      responses:
+        '200':
+          description: OK
+  /instances/{instanceId}:
+    delete:
+      summary: Logical deletion of an instance
+      tags: 
+        - Repository
+      operationId: logicallyDeleteInstance
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          schema: 
+            $ref: '#/components/schemas/DatabaseIdentifier'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instance'
+    post:
+      summary: Creation or update of an instance (depending on whether it has an Id or not)
+      tags: 
+        - Repository
+      operationId: createOrUpdateInstance
+      requestBody:
+        description: The instance to be created or updated
+        $ref: '#/components/schemas/Instance'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instance'
+  /instances/{instanceId}/hard-delete:
+    post:
+      summary: Physically deletes the instance and all its related entities.
+      description: This is only allowed when the instance and all related entities are already flagged as deleted.
+      tags: 
+        - Repository
+      operationId: physicallyDeleteInstance
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          schema: 
+            $ref: '#/components/schemas/DatabaseIdentifier'
+      responses:
+        '200':
+          description: OK
+
+
+
+
   /business-objects/search:
     post:
       summary: Search for business objects and their related assets
       description: >
-        ToDo   
+        Search for business objects. Result holds all matching business objects toghether with their instance groups and instances.   
       tags: 
         - Repository
       operationId: searchBusinessObjects
-      security:
-        - SessionAuthentication: []
       requestBody:
         $ref: '#/components/requestBodies/BusinessObjectSearchRequest'
       responses:
@@ -42,8 +227,8 @@ paths:
                   type: array
                   items:
                     $ref: '#/components/schemas/BusinessObject'
-          '401':
-            $ref: '_errors.yaml#/components/responses/UnauthorizedError'
+#          '401':
+#            $ref: '_errors.yaml#/components/responses/UnauthorizedError'
 components:
   securitySchemes:
     SessionAuthentication:
@@ -53,9 +238,233 @@ components:
     BusinessObject:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
+        GoId:
+          $ref: '#/components/schemas/GoId'
+        Pool: 
+          $ref: '#/components/schemas/Pool'
+        Comment:
+          type: string
+        InstanceGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstanceGroup'
+        Modification:
+          $ref: '#/components/schemas/ModificationData'
+    InstanceGroup:
+      type: object
+      properties:
+        Ipn:
+          $ref: '#/components/schemas/Ipn'
+        GoType:
+          $ref: '#/components/schemas/IgGoType'
+        GoCategory:
+          $ref: '#/components/schemas/IgGoCategory'
+        Category:
+          $ref: '#/components/schemas/IgCategory'
+        CategoryDescription:
+          type: string
+          description: Description of the instance group's category (IgKategorieBemerkung)
+        Class:
+          $ref: '#/components/schemas/IgClass'
+        ClassDescription:
+          type: string
+          description: Description of the instance group's class (IaArtBemerkung)
+        Title:
+          type: string
+          description: Title of the instance group (IgTitel)
+        Comment:
+          type: string
+          description: Comment on the instance group
+        Production: 
+          $ref: '#/components/schemas/ProductionData'
+        Instances:
+          type: array
+          items:
+            $ref: '#/components/schemas/Instance'
+        Identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Identifier'
+        Modification:
+          $ref: '#/components/schemas/ModificationData'
+    Instance:
+      type: object
+      properties:
+        Id:
+          $ref: '#/components/schemas/DatabaseIdentifier'
+          description: Internal identifier of the instance (primary key within database)
+        ExternalSystem:
+          $ref: '#/components/schemas/System'
+        ExternalId:
+          type: string
+          description: Identifier of the instance within the system (PSystemInstanzSchlüssel)
+        ExternalTitle:
+          type: string
+          description: Title of the instance within the system (PSystemTitel)
+        ExternallyCreated:
+          $ref: '#/components/schemas/ChangelogData'
+          description: Creation information of the instance within its system
+        ExternallyModified:
+          $ref: '#/components/schemas/ChangelogData'
+          description: Modification information of the instance within its system
+        Modification:
+          $ref: '#/components/schemas/ModificationData'
+    Identifier:
+      type: object
+      description: Idenfication information
+      properties: 
+        Type:
+          $ref: '#/components/schemas/IdentifierType'
+        Class:
+          $ref: '#/components/schemas/IdentifierClass'
+        Value1:
+          type: string
+          description: Primary value of the identifier
+          $ref: '#/components/schemas/IdentifierValue'
+        Value2:
+          type: string
+          description: Secondary value of the identifier
+          $ref: '#/components/schemas/IdentifierValue'
+        Comment:
+          type: string
+          description: Describes the identifier (Bemerkung)
+        Modification:
+          $ref: '#/components/schemas/ModificationData'
+    IdentifierValue:
+      type: object
+      description: Some identification record with value and format
+      properties:
+        Value:
+          type: string
+          description: value of the identifier (IdentifierWert)
+        Format:
+          type: string
+          description: The value's format (IdentifierFormat)
+    IdentifierType:
+      type: string
+      description: What kind of identifier. Examples are WorkflowId, SystemA-ID, ...
+    IdentifierClass:
+      type: string
+      description: Higher level classification of identifier. Identifier group like database, essence, order
+    Pool:
+      type: string
+      description: Classification of the asset, technical information (storage/visibility related).
+      enum:
+        - Archive
+        - Production
+    ModificationData:
+      type: object
+      description: Changelog information about an asset within the Repository
+      properties:
+        Created:
+          $ref: '#/components/schemas/ChangelogData'
+        Modified:
+          $ref: '#/components/schemas/ChangelogData'
+        Deleted:
+          $ref: '#/components/schemas/ChangelogData'
+    ChangelogData:
+      type: object
+      description: When and by whom a change happened
+      properties:
+        Date:
+          $ref: '#/components/schemas/DateTime'
+          description: Date and time when the change happened
+        User:
+          $ref: '#/components/schemas/UserLogin'
+          description: User who performed the modification
+    ProductionData:
+      type: object
+      description: Production related information
+      properties: 
+        Title1:
+          type: string
+        Title2:
+          type: string
+        ProductionNumber:
+          $ref: '#/components/schemas/ProductionNumber'
+        CostCenter:
+          $ref: '#/components/schemas/CostCenter'
+        Description:
+          type: string
+          description: a short description of the Production (Kurzbeschreibung)
+        Station:
+          $ref: '#/components/schemas/Station'
+        Genre:
+          $ref: '#/components/schemas/Genre'
+        Ressort:
+          $ref: '#/components/schemas/Ressort'
+        EditorialOffice:
+          $ref: '#/components/schemas/EditorialOffice'
+        CreationType:
+          $ref: '#/components/schemas/CreationType'
+        Duration:
+          $ref: '#/components/schemas/ClipDuration'
+        CreationArea:
+          $ref: '#/components/schemas/CreationArea'
+        Comment:
+          type: string
+        Modification:
+          $ref: '#/components/schemas/ModificationData'
+    GoId:
+      type: string
+      description: The ID of the business object (GO-ID)
+    Ipn:
+      type: string
+      description: Intelligent production number. ID of an instance group (iPN). Unique identifier for business object instance at the customer.
+    IgGoType:
+      type: string
+      description: Type of business object within the instance group (IgGoTyp)
+    IgGoCategory:
+      type: string
+      description: Business object category of the instance group (IgGoKategorie)
+    IgCategory:
+      type: string
+      description: Category of the instance group (IgKategorie)
+    IgClass:
+      type: string
+      description: Classification Identifier of the instance group (IgArtID)
+    System:
+      type: string
+      description: Identifier for some system (PSystem)
+    UserLogin:
+      type: string
+    ProductionNumber:
+      type: string
+      maxLength: 6
+      description: Identifying number in production environment (Produktionsnummer)
+    CostCenter:
+      type: string
+      maxLength: 6
+      description: Relevant for billing (Kostenstelle)
+    Station:
+      type: string
+      description: The TV station like Bayerischer Rundfunk, Südwestrundfunk (Station)
+    Genre:
+      type: string
+      description: Genre of the clip like news show, interview, sport (Genre)
+    Ressort:  
+      type: string
+      description: Ressort of some show (Bereich)
+    EditorialOffice:  
+      type: string
+      description: Editorial office (Redaktion)
+    CreationType:
+      type: string
+      description: (Entstehungsart)
+    ClipDuration:
+      type: integer
+      format: int64
+      description: Duration of a video asset in seconds (Dauer)
+    CreationArea:
+      type: string
+      description: (Entstehungsbereich)
+    DateTime:
+      type: string
+      format: date-time
+    DatabaseIdentifier:
+      type: integer
+      format: int64
+      description: Internal identifier of an entity (primary key within database)
     BusinessObjectSearchArguments:
       type: object
       properties:
